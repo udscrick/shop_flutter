@@ -40,4 +40,9 @@ class Cart with ChangeNotifier {
      });
      return total;
   }
+
+  void removeItem(id){
+    _items.remove(id);
+    notifyListeners();
+  }
 }
