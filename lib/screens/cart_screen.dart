@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart.dart'
     show
         Cart; //Since from this file we only require the Cart Class, otherwise cart item name clash
+import 'package:shop_app/providers/orders_provider.dart';
 import '../widgets/cart_screen/cart_item.dart';
 
 class CartScreen extends StatelessWidget {
@@ -30,7 +31,7 @@ class CartScreen extends StatelessWidget {
                   Spacer(),
                   Chip(
                     label: Text(
-                      '\$${cart.totalAmount}',
+                      '\$${cart.totalAmount.toStringAsFixed(2)}',
                       style: TextStyle(
                           color: Theme.of(context)
                               .primaryTextTheme
@@ -40,7 +41,11 @@ class CartScreen extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(
+                          cart.items.values.toList(), cart.totalAmount);
+                          cart.clearCart();
+                    },
                     child: Text('ORDER NOW'),
                     textColor: Theme.of(context).primaryColor,
                   )
@@ -59,7 +64,7 @@ class CartScreen extends StatelessWidget {
                 title: cart.items.values.toList()[i].title,
                 price: cart.items.values.toList()[i].price,
                 quantity: cart.items.values.toList()[i].quantity,
-                productid:cart.items.keys.toList()[i]),
+                productid: cart.items.keys.toList()[i]),
           ))
         ],
       ),
