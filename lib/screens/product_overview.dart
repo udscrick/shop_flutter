@@ -16,10 +16,40 @@ enum FilterOptions {
 class ProductOverviewScreen extends StatefulWidget {
   @override
   _ProductOverviewScreenState createState() => _ProductOverviewScreenState();
+
+
 }
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   var _showFavourites = false;
+  var isFirstCall  =true;
+  var isLoaded = false;
+
+  @override
+    void initState() {
+      // TODO: implement initState
+      // Provider.of<ProductsProvider>(context,listen: false).fetchAndSetProducts(); //Option 1
+
+      //Option 2
+      // Future.delayed(Duration.zero).then((value){
+      //   Provider.of<ProductsProvider>(context).fetchAndSetProducts();
+      // });
+      super.initState();
+    }
+
+//Option 3
+    @override
+      void didChangeDependencies() {
+        // TODO: implement didChangeDependencies
+        if(isFirstCall){
+          print('here');
+          Provider.of<ProductsProvider>(context).fetchAndSetProducts().then((value){
+            isLoaded = true;
+          });
+        }
+        isFirstCall = false;
+        super.didChangeDependencies();
+      }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +91,7 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showFavourites),
+      body:isLoaded? ProductsGrid(_showFavourites):Center(child: CircularProgressIndicator(),),
     );
   }
 }

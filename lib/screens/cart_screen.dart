@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart.dart'
@@ -8,6 +9,15 @@ import '../widgets/cart_screen/cart_item.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
+  var isLoaded = true;
+  onOrderNowClick(cart,BuildContext context) async {
+    isLoaded = false;
+    await Provider.of<Orders>(context, listen: false)
+        .addOrder(cart.items.values.toList(), cart.totalAmount);
+        isLoaded = true;
+    cart.clearCart();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<Cart>(context);
@@ -41,11 +51,7 @@ class CartScreen extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                   FlatButton(
-                    onPressed: () {
-                      Provider.of<Orders>(context, listen: false).addOrder(
-                          cart.items.values.toList(), cart.totalAmount);
-                          cart.clearCart();
-                    },
+                    onPressed:()=>(cart.totalAmount<=0||!isLoaded)?null: onOrderNowClick(cart,context),//Button is disabled automatically if value is null
                     child: Text('ORDER NOW'),
                     textColor: Theme.of(context).primaryColor,
                   )
@@ -57,7 +63,7 @@ class CartScreen extends StatelessWidget {
             height: 10,
           ),
           Expanded(
-              child: ListView.builder(
+              child:isLoaded?  ListView.builder(
             itemCount: cart.cartItemTotal,
             itemBuilder: (ctx, i) => CartItem(
                 id: cart.items.values.toList()[i].id,
@@ -65,7 +71,10 @@ class CartScreen extends StatelessWidget {
                 price: cart.items.values.toList()[i].price,
                 quantity: cart.items.values.toList()[i].quantity,
                 productid: cart.items.keys.toList()[i]),
-          ))
+          ):
+    Center(child: CircularProgressIndicator())
+          )
+
         ],
       ),
     );
