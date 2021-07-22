@@ -6,6 +6,9 @@ import 'package:http/http.dart'
 import 'dart:convert';
 
 class Orders with ChangeNotifier {
+  final authToken;
+  final userid;
+  Orders(this.authToken,this._orders,this.userid);
   List<OrderItem> _orders = [];
 
   List<OrderItem> get orders {
@@ -13,8 +16,8 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetOrders() async {
-    const url =
-        'https://flutter-shop-ecb92-default-rtdb.firebaseio.com/orders.json';
+    final url =
+        'https://flutter-shop-ecb92-default-rtdb.firebaseio.com/orders/$userid.json?auth=$authToken';
     try {
       var response = await http.get(url);
       print(json.decode(response.body));
@@ -41,8 +44,8 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> addOrder(List<CartItem> cartItems, double total) async {
-    const url =
-        'https://flutter-shop-ecb92-default-rtdb.firebaseio.com/orders.json';
+    final url =
+        'https://flutter-shop-ecb92-default-rtdb.firebaseio.com/orders/$userid.json?auth=$authToken';
     final timestamp = DateTime.now();
     try {
       final response = await http.post(url,

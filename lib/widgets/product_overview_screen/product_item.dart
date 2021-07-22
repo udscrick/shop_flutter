@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import 'package:shop_app/providers/cart.dart';
 import 'package:shop_app/providers/product.dart';
 import 'package:shop_app/providers/products_provider.dart';
@@ -13,6 +14,8 @@ class ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final token = Provider.of<Auth>(context,listen: false).token;
+    final userid = Provider.of<Auth>(context,listen: false).userid;
     final productinfo = Provider.of<Product>(context,
         listen:
             false); //listen is set to false as we dont want the entire widget to rebuild but only the part inside consumer
@@ -39,7 +42,7 @@ class ProductItem extends StatelessWidget {
                 icon: Icon(Icons.favorite),
                 onPressed: () {
                   Provider.of<Product>(context, listen: false)
-                      .markAsFavourite();
+                      .markAsFavourite(token,userid);
                 },
                 color: productinfo.isFavourite
                     ? Theme.of(context).accentColor

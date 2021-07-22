@@ -6,11 +6,28 @@ import 'package:shop_app/widgets/app_drawer/app_drawer.dart';
 import '../widgets/user_products/user_product_item.dart';
 import '../screens/edit_product_screen.dart';
 
-class UserProductsScreen extends StatelessWidget {
+class UserProductsScreen extends StatefulWidget {
   static const routeName = '/myproducts';
+
+  @override
+  State<UserProductsScreen> createState() => _UserProductsScreenState();
+}
+
+class _UserProductsScreenState extends State<UserProductsScreen> {
+  var isLoaded = false;
   Future<void> _onPageRefresh(BuildContext context)async{
-    await Provider.of<ProductsProvider>(context,listen: false).fetchAndSetProducts();
+    await Provider.of<ProductsProvider>(context,listen: false).fetchAndSetProducts(type:'user');
   }
+  @override
+  void initState() {
+    // TODO: implement initState
+    Provider.of<ProductsProvider>(context,listen: false).fetchAndSetProducts(type:'user').then((_){
+      isLoaded = true;
+    });
+    
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final productsData = Provider.of<ProductsProvider>(context);
@@ -26,7 +43,7 @@ class UserProductsScreen extends StatelessWidget {
               })
         ],
       ),
-      body: RefreshIndicator(
+      body:isLoaded? RefreshIndicator(
         onRefresh:()=>_onPageRefresh(context) ,
         child: Padding(
           padding: EdgeInsets.all(8),
@@ -40,6 +57,8 @@ class UserProductsScreen extends StatelessWidget {
             ]),
           ),
         ),
+      ):Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }
