@@ -22,14 +22,11 @@ class Product with ChangeNotifier{
     this.imageUrl,
     this.isFavourite});
 
-     Future<void> markAsFavourite()async{
-       final url = 'https://flutter-shop-ecb92-default-rtdb.firebaseio.com/products/$id.json';
+     Future<void> markAsFavourite(String authToken,String userid)async{
+       final url = 'https://flutter-shop-ecb92-default-rtdb.firebaseio.com/userFavourites/$userid/$id.json?auth=$authToken';
     isFavourite = !isFavourite;
     
-    var response = await http.patch(url,body: json.encode({
-  
-        "isFavourite":isFavourite
-      }));
+    var response = await http.put(url,body: json.encode(isFavourite));
       if(response.statusCode>=400){
          isFavourite = !isFavourite;
      
