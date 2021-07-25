@@ -7,9 +7,34 @@ import 'package:shop_app/providers/auth.dart';
 
 enum AuthMode { Signup, Login }
 
-class AuthScreen extends StatelessWidget {
+class AuthScreen extends StatefulWidget {
   static const routeName = '/auth';
 
+  @override
+  State<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin{
+  AnimationController _controller;
+  Animation<double> _opacityAnimation;
+  Animation<double> _scaleAnimation;
+
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+   
+    _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 700));
+    _opacityAnimation = Tween(begin: 0.0,end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _scaleAnimation = Tween(begin: 0.0,end:1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
+    _controller.forward();
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
@@ -41,31 +66,37 @@ class AuthScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Flexible(
-                    child: Container(
-                      margin: EdgeInsets.only(bottom: 20.0),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
-                      transform: Matrix4.rotationZ(-8 * pi / 180)
-                        ..translate(-10.0),
-                      // ..translate(-10.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.deepOrange.shade900,
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 8,
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                          )
-                        ],
-                      ),
-                      child: Text(
-                        'MyShop',
-                        style: TextStyle(
-                          color: Theme.of(context).accentTextTheme.title.color,
-                          fontSize: 50,
-                          fontFamily: 'Anton',
-                          fontWeight: FontWeight.normal,
+                    child: ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: FadeTransition(
+                        opacity: _opacityAnimation,
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 20.0),
+                          padding:
+                              EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
+                          transform: Matrix4.rotationZ(-8 * pi / 180)
+                            ..translate(-10.0),
+                          // ..translate(-10.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.deepOrange.shade900,
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 8,
+                                color: Colors.black26,
+                                offset: Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: Text(
+                            'MyShop',
+                            style: TextStyle(
+                              color: Theme.of(context).accentTextTheme.title.color,
+                              fontSize: 50,
+                              fontFamily: 'Anton',
+                              fontWeight: FontWeight.normal,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -105,6 +136,7 @@ class _AuthCardState extends State<AuthCard>
   final _passwordController = TextEditingController();
   AnimationController _controller;
   Animation<Size> _heightAnimation;
+  Animation<double>_opacityAnimation;
 
   @override
   void initState() {
@@ -119,6 +151,7 @@ class _AuthCardState extends State<AuthCard>
         .animate(CurvedAnimation(
             parent: _controller, curve: Curves.fastOutSlowIn));
 
+    _opacityAnimation = Tween(begin: 0.0,end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn,),);
     //Option 1: Used when we are not using AnimationBuilder and constructing the animations ourselves
     // _heightAnimation.addListener(()=>setState(() {
       
@@ -210,18 +243,31 @@ class _AuthCardState extends State<AuthCard>
       ),
       elevation: 8.0,
       //Option 2:Using AnimatedBuilder
-      child: AnimatedBuilder(animation: _heightAnimation,builder: (ctx,ch)=>Container(
-        // height: _authMode == AuthMode.Signup ? 320 : 260,
-        height: _heightAnimation.value.height,
+      child: 
+      // AnimatedBuilder(animation: _heightAnimation,builder: (ctx,ch)=>Container(
+
+        //Option 3
+        AnimatedContainer(
+
+        //In animatedcontainer we have the following two properties built in and thus we dont need
+        //a seperate animation object
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+
+        height: _authMode == AuthMode.Signup ? 320 : 260,
+        // height: _heightAnimation.value.height,//Needed with the AnimationBuilder approach
         constraints: BoxConstraints(
             minHeight: _authMode == AuthMode.Signup
                 ? _heightAnimation.value.height
                 : 260),
         width: deviceSize.width * 0.75,
         padding: EdgeInsets.all(16.0),
-        child:ch //Will receive the FOrm that is passed below as the child of Animateduilder
-         ),
-        child:Form(
+
+        // child:
+        // ch //Will receive the FOrm that is passed below as the child of Animateduilder
+        //  ),
+        child:
+        Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
@@ -254,17 +300,27 @@ class _AuthCardState extends State<AuthCard>
                   },
                 ),
                 if (_authMode == AuthMode.Signup)
-                  TextFormField(
-                    enabled: _authMode == AuthMode.Signup,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    validator: _authMode == AuthMode.Signup
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            }
-                          }
-                        : null,
+                  AnimatedContainer(//We are wrapping the Fade Transition inside an animated container so that, 
+                  //in case of sign in there will be no extra space reserved for the confirm password popup that
+                  //does not exist and only exists in the sign up
+                    constraints: BoxConstraints(minHeight: _authMode==AuthMode.Signup?60:0,maxHeight: _authMode==AuthMode.Signup?120:0),
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeIn,
+                    child: FadeTransition(
+                      opacity: _opacityAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.Signup,
+                        decoration: InputDecoration(labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.Signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
+                              }
+                            : null,
+                      ),
+                    ),
                   ),
                 SizedBox(
                   height: 20,
