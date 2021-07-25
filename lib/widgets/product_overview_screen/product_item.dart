@@ -31,10 +31,20 @@ class ProductItem extends StatelessWidget {
             Navigator.of(context)
                 .pushNamed('product-details', arguments: productinfo.id);
           },
-          child: Image.network(
-            productinfo.imageUrl,
-            fit: BoxFit.cover,
-          ),
+          //FadeInImage can be used for Image Placeholders
+          child:Hero(
+            //Hero animation is a type of animation where, an image
+            //from the previous page is kept on screen and loaded onto
+            //the new screen
+            tag: productinfo.id,
+            child: FadeInImage(placeholder: AssetImage('assets/images/product-placeholder.png'),
+            image: NetworkImage(productinfo.imageUrl),
+            fit: BoxFit.cover,),
+          )
+          //  Image.network(
+          //   productinfo.imageUrl,
+          //   fit: BoxFit.cover,
+          // ),
         ),
         footer: GridTileBar(
           leading: Consumer<Product>(
